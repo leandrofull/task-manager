@@ -49,7 +49,7 @@ $task = $taskManager->getById($taskId);
 
 $taskManager->run($task);
 
-// Way 2: Run Multiple Tasks with map method
+// Way 2: Run Multiple Tasks using map method
 $tasks = $taskManager->getByTag('mailsend'); // Or $taskManager->getAll();
 
 $tasks->map(function($task) use ($taskManager) {
@@ -57,7 +57,7 @@ $tasks->map(function($task) use ($taskManager) {
     sleep(1); // Interval
 });
 
-// Way 3: Run Multiple Tasks with tasks array
+// Way 3: Run Multiple Tasks using tasks array
 $tasks = $taskManager->getByTag('mailsend')->toArray(); // Or $taskManager->getAll()->toArray();
 
 foreach ($tasks as $task) {
