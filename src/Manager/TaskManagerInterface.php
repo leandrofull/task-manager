@@ -1,8 +1,8 @@
 <?php
 
-namespace TaskManager\TaskManager\Manager;
+namespace LeandroFull\TaskManager\Manager;
 
-use TaskManager\TaskManager\Model\{Task, TaskCollection};
+use LeandroFull\TaskManager\Model\{Task, TaskCollection};
 
 interface TaskManagerInterface
 {

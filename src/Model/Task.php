@@ -1,6 +1,6 @@
 <?php
 
-namespace TaskManager\TaskManager\Model;
+namespace LeandroFull\TaskManager\Model;
 
 class Task
 {

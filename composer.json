@@ -1,10 +1,12 @@
 {
-    "name": "task-manager/task-manager",
+    "name": "leandrofull/task-manager",
     "type": "library",
     "license": "proprietary",
+    "description": "Async Task Manager",
+    "homepage": "https://github.com/leandrofull/task-manager",
     "autoload": {
         "psr-4": {
-            "TaskManager\\TaskManager\\": "src/"
+            "LeandroFull\\TaskManager\\": "src/"
         }
     },
     "authors": [
@@ -14,5 +16,7 @@
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+        "php": ">=8.3.0"
+    }
 }

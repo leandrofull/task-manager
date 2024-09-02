@@ -4,14 +4,14 @@ If you want to perform actions in parallel so as not to impact your app navigati
 
 First of all, you need to install it through Composer:
 
-<Code>composer require leandrofull/async-task-manager</Code>
+<Code>composer require leandrofull/task-manager</Code>
 
 ## How to Use
 
 ```php
 <?php
 
-use TaskManager\TaskManager\Manager\TaskManager;
+use LeandroFull\TaskManager\Manager\TaskManager;
 
 require __DIR__ . '/vendor/autoload.php';
 

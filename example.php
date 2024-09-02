@@ -1,6 +1,6 @@
 <?php
 
-use TaskManager\TaskManager\Manager\TaskManager;
+use LeandroFull\TaskManager\Manager\TaskManager;
 
 require __DIR__ . '/vendor/autoload.php';
 
