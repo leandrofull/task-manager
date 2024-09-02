@@ -44,7 +44,9 @@ class TaskManager implements TaskManagerInterface
                 continue;
             }
 
-            $callback($target, $currentPath);
+            $return = $callback($target, $currentPath);
+
+            if ($return === true) break;
         }
     }
 
@@ -72,17 +74,7 @@ class TaskManager implements TaskManagerInterface
         string $taskTag = 'default',
         ?\DateTimeImmutable $datetime = null
     ): ?Task
-    {
-        if (gettype($objectOrClass) === 'string' && !class_exists($objectOrClass))
-            throw new \LogicException('Class not found');
-    
-        if (!method_exists($objectOrClass, $method))
-            throw new \LogicException('Method not found');
-
-        $taskTag = preg_replace("/[^0-9a-zA-Zà-úÀ-Ú\_\-]/", '', trim($taskTag));            
-        $taskTag = str_replace("-", '_', $taskTag);            
-        if (empty($taskTag)) $taskTag = 'default';
-        
+    {        
         $taskId = sha1(microtime() . strval(rand(0, 1000000)));
 
         if ($datetime === null) $datetime = new \DateTimeImmutable();
@@ -105,8 +97,12 @@ class TaskManager implements TaskManagerInterface
         $task = null;
 
         $this->search("{$this->tasksPath}/tasks", function($target, $path) use ($id, &$task) {
-            if ($target === "{$path}/{$id}.task")
+            if ($target === "{$path}/{$id}.task") {
                 $task = unserialize(file_get_contents($target));
+                return true;
+            }
+
+            return false;
         });
 
         return $task;
@@ -119,6 +115,7 @@ class TaskManager implements TaskManagerInterface
         $this->search("{$this->tasksPath}/tasks/{$tag}", function($target) use (&$collection) {
             $task = unserialize(file_get_contents($target));
             $collection->set($task->id, $task);
+            return false;
         });
 
         return $collection;
@@ -131,6 +128,7 @@ class TaskManager implements TaskManagerInterface
         $this->search("{$this->tasksPath}/tasks", function($target) use (&$collection) {
             $task = unserialize(file_get_contents($target));
             $collection->set($task->id, $task);
+            return false;
         });
 
         return $collection;
@@ -158,8 +156,9 @@ class TaskManager implements TaskManagerInterface
             $this->remove($task);
             return true;
         } catch(\Throwable $e) {
-            if ($task->attempts < 0 || $task->attempts > $this->maxAttempts) $task->attempts = 0;
+            if ($task->attempts < 0) $task->attempts = 0;
             $task->attempts++;
+            if ($task->attempts > $this->maxAttempts) $task->attempts = $this->maxAttempts;
             $logMessage = "[ERROR] Attempt {$task->attempts}/{$this->maxAttempts} - ID: {$task->id}";
             if (!empty($task->title)) $logMessage .= " - Title: {$task->title}";
             $logMessage .= " - Tag: {$task->tag}";

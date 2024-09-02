@@ -50,7 +50,7 @@ $tasks->map(function($task) use ($taskManager) {
 $tasks = $taskManager->getByTag('mailsend')->toArray(); // Or $taskManager->getAll()->toArray();
 
 foreach ($tasks as $task) {
-    $taskManager->run($task);
+    if ($task !== null) $taskManager->run($task);
     sleep(1); // Interval
 }
 

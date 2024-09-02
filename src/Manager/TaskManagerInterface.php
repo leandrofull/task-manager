@@ -12,7 +12,8 @@ interface TaskManagerInterface
      * @param mixed[] $args
      * @param string $taskTitle
      * @param string $taskTag
-     * @return bool
+     * @param \DateTimeImmutable $datetime
+     * @return ?Task
      */
     public function create(
         object|string $objectOrClass,
