@@ -114,6 +114,8 @@ php vendor/bin/taskmanager manager:config files 'C:\Users\user\Desktop\project\v
 
 Params: max_attempts, dsn
 
+Read: [Doctrine Configuration](https://www.doctrine-project.org/projects/doctrine-dbal/en/4.1/reference/configuration.html#connecting-using-a-url)
+
 ```
 php vendor/bin/taskmanager manager:config doctrine 3 'pdo-sqlite://ignored:ignored@ignored:1234/somedb.sqlite'
 ```
@@ -232,6 +234,7 @@ require __DIR__ . '/classes.php';
 require __DIR__ . '/vendor/autoload.php';
 
 $taskManager = new TaskManager(__DIR__ . '/var', 2);
+// Or $taskManager = new DoctrineTaskManager(3, 'pdo-sqlite://ignored:ignored@ignored:1234/somedb.sqlite');
 $mailSender = new AsyncMailSender(new MailSender(), $taskManager);
 
 $mailSender->send(); // Create a email sending task
@@ -247,6 +250,7 @@ require __DIR__ . '/classes.php';
 require __DIR__ . '/vendor/autoload.php';
 
 $taskManager = new TaskManager(__DIR__ . '/var', 2);
+// Or $taskManager = new DoctrineTaskManager(3, 'pdo-sqlite://ignored:ignored@ignored:1234/somedb.sqlite');
 
 set_time_limit(0);
 
