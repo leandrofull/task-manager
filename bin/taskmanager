@@ -1,0 +1,37 @@
+<?php
+
+use LeandroFull\TaskManager\Cli as Cli;
+
+require $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
+
+if ($_SERVER['argc'] < 2) throw new \ArgumentCountError();
+
+/** @var array $args */
+$args = $_SERVER['argv'];
+array_shift($args);
+
+$classAndMethod = explode(":", array_shift($args));
+
+if (count($classAndMethod) !== 2)
+    throw new \ArgumentCountError();
+
+[$class, $method] = $classAndMethod;
+
+$classes = [
+    'manager' => Cli\TaskManagerCli::class,
+];
+
+if (!isset($classes[$class]))
+    throw new \LogicException('Class not found');
+
+if ($method !== 'config' && !method_exists($classes[$class], $method))
+    throw new \BadMethodCallException();
+
+if ($method === 'config') {
+    $instance = new $classes[$class]($args);
+} else if ($method !== '__construct') {
+    $instance = new $classes[$class]();
+    $instance->{$method}(...$args);
+} else {
+    throw new \BadMethodCallException();
+}

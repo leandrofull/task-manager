@@ -12,7 +12,7 @@ class TaskManager implements TaskManagerInterface
     {
         if (!is_dir($tasksPath)) throw new \LogicException('Path not found');
         if (!is_dir($path = "{$tasksPath}/tasks")) mkdir($path);
-        if ($maxAttempts < 1) $this->maxAttempts = 1;
+        $this->maxAttempts = $maxAttempts < 1 ? 1 : $maxAttempts;
     }
 
     private function search(string $basePath, \Closure $callback): void

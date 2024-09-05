@@ -75,3 +75,171 @@ Result in '/var/.log':
 [SUCCESS] ID: ef7b4c20437ab82e849ffe0bf7a77ef803dde84c - Title: Send Email - Tag: mailsend
 */
 ```
+
+## CLI
+
+Config task manager:
+<Code>php vendor/bin/taskmanager manager:config [alias] [...params]</Code>
+
+Run a task by id:
+<Code>php vendor/bin/taskmanager manager:run [task-id]</Code>
+
+Run multiple tasks by tag (infinte loop script):
+<Code>php vendor/bin/taskmanager manager:runtag [task-tag] [interval]</Code>
+
+Run all tasks (infinte loop script):
+<Code>php vendor/bin/taskmanager manager:runall [interval]</Code>
+
+Note: The interval param defines the time between each task
+
+### Config Example
+
+```
+php vendor/bin/taskmanager manager:config files 'C:\Users\user\Desktop\project\var'
+```
+
+## Real Example
+
+### classes.php
+```php
+<?php
+
+use LeandroFull\TaskManager\Manager\TaskManagerInterface;
+
+interface MailSenderInterface
+{
+    public function from(string $from): self;
+
+    public function to(string $to): self;
+
+    public function subject(string $subject): self;
+
+    public function message(string $message): self;
+
+    public function send(): void;
+}
+
+class MailSender implements MailSenderInterface
+{
+    private string $from_var;
+    private string $to_var;
+    private string $subject_var;
+    private string $message_var;
+
+    public function from(string $from): self
+    {
+        $this->from_var = $from;
+        return $this;
+    }
+
+    public function to(string $to): self
+    {
+        $this->to_var = $to;
+        return $this;
+    }
+
+    public function subject(string $subject): self
+    {
+        $this->subject_var = $subject;
+        return $this;
+    }
+
+    public function message(string $message): self
+    {
+        $this->message_var = $message;
+        return $this;
+    }
+
+    public function send(): void
+    {
+        // Send email
+    }
+}
+
+class AsyncMailSender implements MailSenderInterface
+{
+    public function __construct(
+        private readonly MailSenderInterface $sender,
+        private readonly TaskManagerInterface $manager,
+    ) {}
+
+    public function from(string $from): self
+    {
+        $this->sender->from($from);
+        return $this;
+    }
+
+    public function to(string $to): self
+    {
+        $this->sender->to($to);
+        return $this;
+    }
+
+    public function subject(string $subject): self
+    {
+        $this->sender->subject($subject);
+        return $this;
+    }
+
+    public function message(string $message): self
+    {
+        $this->sender->message($message);
+        return $this;
+    }
+
+    public function send(): void
+    {
+        $task = $this->manager->create(
+            objectOrClass: $this->sender,
+            method: 'send',
+            args: [],
+            taskTitle: 'Send Email',
+            taskTag: 'mailsend',
+        );
+
+        if ($task === null) throw new \Exception('Unexpected error');
+    }
+}
+```
+
+### file1.php
+```php
+<?php
+
+use LeandroFull\TaskManager\Manager\TaskManager;
+
+require __DIR__ . '/classes.php';
+require __DIR__ . '/vendor/autoload.php';
+
+$taskManager = new TaskManager(__DIR__ . '/var', 2);
+$mailSender = new AsyncMailSender(new MailSender(), $taskManager);
+
+$mailSender->send(); // Create a email sending task
+```
+
+### file2.php
+```php
+<?php
+
+use LeandroFull\TaskManager\Manager\TaskManager;
+
+require __DIR__ . '/classes.php';
+require __DIR__ . '/vendor/autoload.php';
+
+$taskManager = new TaskManager(__DIR__ . '/var', 2);
+
+set_time_limit(0);
+
+while (true) {
+    $tasks = $taskManager->getAll();
+    $tasks->map(function($task) use ($taskManager) {
+        $taskManager->run($task);
+        sleep(5); // Interval
+    });
+}
+```
+
+### /var/tasks/.log
+```
+[SUCCESS] ID: 482fff92c74c74c985653812081f874164d91174 - Title: Send Email - Tag: mailsend
+```
