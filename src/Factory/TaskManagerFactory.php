@@ -11,9 +11,9 @@ final class TaskManagerFactory
     {
         switch($alias) {
             case 'files':
-                $manager = new Manager\TaskManager($params[0] ?? null, $params[1] ?? 3);
-                return $manager;
-                
+                return new Manager\TaskManager($params[0] ?? null, $params[1] ?? 3);
+            case 'doctrine':
+                return new Manager\DoctrineTaskManager($params[0] ?? null, $params[1] ?? null);
             default: throw new \LogicException("Alias '$alias' not found");
         }
     }

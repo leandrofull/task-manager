@@ -11,7 +11,7 @@ First of all, you need to install it through Composer:
 ```php
 <?php
 
-use LeandroFull\TaskManager\Manager\TaskManager;
+use LeandroFull\TaskManager\Manager\{DoctrineTaskManager, TaskManager};
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -24,9 +24,16 @@ class MailSender
     }
 }
 
+// Create a Task Manager - Management by files
 $taskManager = new TaskManager(
     tasksPath: __DIR__ . '/var', // Enter an existing directory to store tasks and log
-    maxAttempts: 3 // Max attempts in case of error - Default: 3
+    maxAttempts: 3, // Max attempts in case of error - Default: 3
+);
+
+// Create a Task Manager - Management by Database (Doctrine)
+$taskManager = new DoctrineTaskManager(
+    maxAttempts: 3, // Max attempts in case of error
+    dsn: 'pdo-sqlite://ignored:ignored@ignored:1234/somedb.sqlite',
 );
 
 // Create Task
@@ -44,13 +51,16 @@ if ($task === null) throw new \Exception('Task not created');
 // Store the Task ID
 $taskId = $task->id;
 
+// Store the Task Tag
+$taskTag = $task->tag;
+
 // Way 1: Run a Task
 $task = $taskManager->getById($taskId);
 
 $taskManager->run($task);
 
 // Way 2: Run Multiple Tasks using map method
-$tasks = $taskManager->getByTag('mailsend'); // Or $taskManager->getAll();
+$tasks = $taskManager->getByTag($taskTag); // Or $taskManager->getAll();
 
 $tasks->map(function($task) use ($taskManager) {
     $taskManager->run($task);
@@ -58,7 +68,7 @@ $tasks->map(function($task) use ($taskManager) {
 });
 
 // Way 3: Run Multiple Tasks using tasks array
-$tasks = $taskManager->getByTag('mailsend')->toArray(); // Or $taskManager->getAll()->toArray();
+$tasks = $taskManager->getByTag($taskTag)->toArray(); // Or $taskManager->getAll()->toArray();
 
 foreach ($tasks as $task) {
     if ($task !== null) $taskManager->run($task);
@@ -92,10 +102,20 @@ Run all tasks (infinte loop script):
 
 Note: The interval param defines the time between each task
 
-### Config Example
+### Config Example - Management by Files
+
+Params: tasks_path, max_attempts (optional)
 
 ```
 php vendor/bin/taskmanager manager:config files 'C:\Users\user\Desktop\project\var'
+```
+
+### Config Example - Management by Database (Doctrine)
+
+Params: max_attempts, dsn
+
+```
+php vendor/bin/taskmanager manager:config doctrine 3 'pdo-sqlite://ignored:ignored@ignored:1234/somedb.sqlite'
 ```
 
 ## Real Example

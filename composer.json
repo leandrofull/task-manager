@@ -17,7 +17,10 @@
     ],
     "minimum-stability": "stable",
     "require": {
-        "php": ">=8.3.0"
+        "php": ">=8.3.0",
+        "doctrine/orm": "^3",
+        "doctrine/dbal": "^4",
+        "symfony/cache": "^7"
     },
     "bin": ["bin/taskmanager"]
 }
