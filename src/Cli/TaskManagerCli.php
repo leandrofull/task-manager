@@ -58,6 +58,7 @@ class TaskManagerCli
             $tasks = $this->manager->getAll();
 
             $tasks->map(function($task) use ($interval) {
+                if (new \DateTimeImmutable() < $task->datetime) return;
                 $success = $this->manager->run($task);
                 $message = $success===true?'[SUCCESS]':'[ERROR]';
                 $message .= " - ID: {$task->id}";
@@ -83,6 +84,7 @@ class TaskManagerCli
             $tasks = $this->manager->getByTag($tag);
 
             $tasks->map(function($task) use ($interval) {
+                if (new \DateTimeImmutable() < $task->datetime) return;
                 $success = $this->manager->run($task);
                 $message = $success===true?'[SUCCESS]':'[ERROR]';
                 $message .= " - ID: {$task->id}";
@@ -94,9 +96,7 @@ class TaskManagerCli
 
                 echo $message . PHP_EOL;
                 sleep($interval);
-            });
-
-            
+            });            
         }
     }
 
@@ -108,6 +108,8 @@ class TaskManagerCli
             echo '[ERROR] Task not found';
             return;
         }
+
+        if (new \DateTimeImmutable() < $task->datetime) return;
 
         $success = $this->manager->run($task);
         $message = $success===true?'[SUCCESS]':'[ERROR]';
